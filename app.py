@@ -98,47 +98,38 @@ def get_name_region_from_reward(access_token):
 def get_openid_from_shop2game(uid):
     if not uid: return None
     try:
-        openid_url = "https://topup.pk/api/auth/player_id_login"
-            openid_headers = { 
+        openid_url = "https://shop2game.com/api/auth/player_id_login"
+        openid_headers = {
             "Accept": "application/json, text/plain, */*",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Accept-Language": "en-MM,en-US;q=0.9,en;q=0.8",
-        "Content-Type": "application/json",
-        "Origin": "https://topup.pk",
-        "Referer": "https://topup.pk/",
-        "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Android WebView";v="138"',
-        "sec-ch-ua-mobile": "?1",
-        "sec-ch-ua-platform": '"Android"',
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin",
-        "User-Agent": "Mozilla/5.0 (Linux; Android 15; RMX5070 Build/UKQ1.231108.001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.7204.157 Mobile Safari/537.36",
-        "X-Requested-With": "mark.via.gp",
-        "Cookie": "source=mb; region=PK; mspid2=13c49fb51ece78886ebf7108a4907756; _fbp=fb.1.1753985808817.794945392376454660; language=en; datadome=WQaG3HalUB3PsGoSXY3TdcrSQextsSFwkOp1cqZtJ7Ax4YkiERHUgkgHlEAIccQO~w8dzTGM70D9SzaH7vymmEqOrVeX5pIsPVE22Uf3TDu6W3WG7j36ulnTg2DltRO7; session_key=hq02g63z3zjcumm76mafcooitj7nc79y",
+            "Accept-Language": "ar-MA,ar;q=0.9,en-US;q=0.8,en;q=0.7,ar-AE;q=0.6,fr-FR;q=0.5,fr;q=0.4",
+            "Connection": "keep-alive",
+            "Content-Type": "application/json",
+            "Cookie": "source=mb; region=MA; mspid2=ca21e6ccc341648eea845c7f94b92a3c; language=ar; _ga=GA1.1.1955196983.1741710601; datadome=WY~zod4Q8I3~v~GnMd68u1t1ralV5xERfftUC78yUftDKZ3jIcyy1dtl6kdWx9QvK9PpeM~A_qxq3LV3zzKNs64F_TgsB5s7CgWuJ98sjdoCqAxZRPWpa8dkyfO~YBgr; session_key=v0tmwcmf1xqkp7697hhsno0di1smy3dm; _ga_0NY2JETSPJ=GS1.1.1741710601.1.1.1741710899.0.0.0",
+            "Origin": "https://shop2game.com",
+            "Referer": "https://shop2game.com/",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36",
+            "sec-ch-ua-mobile": "?1",
+            "sec-ch-ua-platform": '"Android"'
         }
-            payload = {"app_id": 100067, "login_id": str(account_id)}
-
-            
-            openid_res = await client.post(openid_url, headers=openid_headers, json=payload)
-            openid_data = openid_res.json()
-            open_id = openid_data.get("open_id")
-            
-            if not open_id:
-                return {"error": "Failed to extract open_id"}
-
-            return {
-                "status": "success",
-                "account_id": account_id,
-                "account_nickname": account_nickname,
-                "open_id": open_id,
-                "access_token": token_value,
-                "region": region,
-                "credit": "Telegram : @Flexbasei",
-                "Power By": "Telegram : @spideerio_yt"
-            }
-
+        payload = {"app_id": 100067, "login_id": str(uid)}
+        res = requests.post(openid_url, headers=openid_headers, json=payload, verify=False)
+        data = res.json()
+        return data.get("open_id")
     except Exception as e:
-        return {"error": "Server error", "details": str(e)}
+        return None
+
+def decode_jwt_info(token):
+    try:
+        decoded = jwt.decode(token, options={"verify_signature": False})
+        name = decoded.get("nickname")
+        region = decoded.get("lock_region") 
+        uid = decoded.get("account_id")
+        return str(uid), name, region
+    except:
+        return None, None, None
 
 def perform_major_login(access_token, open_id):
     platforms = [8, 3, 4, 6]
